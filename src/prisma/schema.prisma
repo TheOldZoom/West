@@ -27,4 +27,43 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   blacklistAt DateTime?
+
+  GuildUser GuildUser[]
+}
+
+model Guild {
+  id String @id
+
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  GuildUser   GuildUser[]
+  GuildPrefix GuildPrefix[]
+}
+
+model GuildUser {
+  id String @id
+
+  guildId String
+  userId  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  guild Guild @relation(fields: [guildId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+}
+
+model GuildPrefix {
+  id String @id @default(uuid())
+
+  guildId String
+  prefix  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  guild Guild @relation(fields: [guildId], references: [id])
 }

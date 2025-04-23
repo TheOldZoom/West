@@ -42,9 +42,7 @@ class Client extends ClientBase {
       : (process.env.TOKEN as string);
     this.commands = new Collection<string, Command>();
     this.commandAliases = new Collection<string, string>();
-    this.prefix = IsDev
-      ? process.env.DEV_PREFIX || "w!"
-      : process.env.PREFIX || "w.";
+    this.prefix = IsDev ? "w!" : "w.";
 
     this.prisma = new PrismaClient();
     this.userDB = new Collection<string, UserDB>();
