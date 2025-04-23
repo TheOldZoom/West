@@ -68,3 +68,12 @@ model GuildPrefix {
 
   guild Guild @relation(fields: [guildId], references: [id])
 }
+
+model Presence {
+  id String @id @default(uuid())
+
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
