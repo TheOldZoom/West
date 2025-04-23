@@ -47,11 +47,16 @@ model Guild {
 model GuildUser {
   id String @id
 
+  nickname String? // forced nickname  
+
   guildId String
   userId  String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bannedAt  DateTime? // permBan
+
+  isOwner Boolean @default(false)
 
   guild Guild @relation(fields: [guildId], references: [id])
   user  User  @relation(fields: [userId], references: [id])
