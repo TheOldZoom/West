@@ -5,7 +5,7 @@ import { GuildDB, GuildPrefixDB, GuildUserDB } from "../structures/GuildDB";
 
 export default new Event(
   "ready",
-  async (client) => {
+  async (client: Client) => {
     client.log.info(`Logged in as ${client.user?.tag}`);
     await ready(client);
   },
@@ -91,6 +91,19 @@ async function ready(client: Client) {
     );
 
     client.db.guilds.set(guild.id, guildDB);
+  }
+
+  const cachedGuildIds = new Set(client.guilds.cache.keys());
+  const guildsInDb = await client.prisma.guild.findMany();
+
+  for (const guild of guildsInDb) {
+    if (!cachedGuildIds.has(guild.id)) {
+      await client.prisma.guild.update({
+        where: { id: guild.id },
+        data: { seenAt: new Date() },
+      });
+      client.log.info(`Updated 'seenAt' for guild ${guild.name} (${guild.id})`);
+    }
   }
 
   client.log.info(`Loaded ${client.db.guilds.size} guilds`);
