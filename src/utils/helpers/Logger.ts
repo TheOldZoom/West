@@ -1,71 +1,70 @@
 import chalk from "chalk";
 
+export type LogLevel = "debug" | "info" | "warn" | "error";
+
 export interface ILogger {
   debug: boolean;
+  context?: string;
 }
 
 class Logger {
-  private colors = chalk;
-  private Debug: boolean;
+  private debugEnabled: boolean;
+  private context?: string;
 
   constructor(options: ILogger) {
-    this.Debug = options.debug;
+    this.debugEnabled = options.debug;
+    this.context = options.context;
   }
 
   private getTime(): string {
-    const now = new Date();
-    return now.toLocaleString();
+    return new Date().toLocaleString();
+  }
+
+  private formatMessage(level: LogLevel, args: any[]): string {
+    const time = chalk.gray(`[${this.getTime()}]`);
+    const context = this.context ? chalk.magenta(`[${this.context}]`) : "";
+    const label = this.getLabel(level);
+    const message = args
+      .map((arg) =>
+        typeof arg === "object" ? JSON.stringify(arg, null, 2) : String(arg)
+      )
+      .join(" ");
+    return `${time} ${label} ${context} ${chalk.white(message)}`;
+  }
+
+  private getLabel(level: LogLevel): string {
+    const labels = {
+      debug: chalk.bgGray.black(" DEBUG  "), // 8 characters
+      info: chalk.bgBlue.white(" INFO   "), // 8 characters
+      warn: chalk.bgYellow.black(" WARN   "), // 8 characters
+      error: chalk.bgRed.white(" ERROR  "), // 8 characters
+    };
+    return labels[level];
   }
 
   debug(...args: any[]): void {
-    if (!this.Debug) return;
-    const message = args
-      .map((arg) =>
-        typeof arg === "object" ? JSON.stringify(arg, null, 2) : arg
-      )
-      .join(" ");
-    console.log(
-      `${this.colors.gray(`[${this.getTime()}]`)} ${this.colors.white(message)}`
-    );
+    if (!this.debugEnabled) return;
+    console.debug(this.formatMessage("debug", args));
   }
 
   info(...args: any[]): void {
-    const message = args
-      .map((arg) =>
-        typeof arg === "object" ? JSON.stringify(arg, null, 2) : arg
-      )
-      .join(" ");
-    console.log(
-      `${this.colors.blue(`[${this.getTime()}]`)} ${this.colors.white(message)}`
-    );
+    console.info(this.formatMessage("info", args));
   }
 
   warn(...args: any[]): void {
-    const message = args
-      .map((arg) =>
-        typeof arg === "object" ? JSON.stringify(arg, null, 2) : arg
-      )
-      .join(" ");
-    console.warn(
-      `${this.colors.yellow(`[${this.getTime()}]`)} ${this.colors.white(
-        message
-      )}`
-    );
+    console.warn(this.formatMessage("warn", args));
   }
 
   error(...args: any[]): void {
-    const message = args
-      .map((arg) =>
-        typeof arg === "object" ? JSON.stringify(arg, null, 2) : arg
-      )
-      .join(" ");
-    console.error(
-      `${this.colors.red(`[${this.getTime()}]`)} ${this.colors.white(message)}`
-    );
+    console.error(this.formatMessage("error", args));
   }
 
   setDebug(debug: boolean): void {
-    this.Debug = debug;
+    this.debugEnabled = debug;
+  }
+
+  setContext(context: string): void {
+    this.context = context;
   }
 }
 

@@ -13,10 +13,16 @@ import loadCommands from "../utils/handlers/Commands";
 import { Command } from "./Command";
 import { PrismaClient } from "../prisma/client";
 import type { UserDB } from "./UserDB";
+import type { GuildDB } from "./GuildDB";
 
 // @ts-ignore
 DefaultWebSocketManagerOptions.identifyProperties.browser = "Discord Android";
 const IsDev = process.env.NODE_ENV === "development";
+
+interface ClientDatabase {
+  users: Collection<string, UserDB>;
+  guilds: Collection<string, GuildDB>;
+}
 
 class Client extends ClientBase {
   public log: Logger;
@@ -24,7 +30,8 @@ class Client extends ClientBase {
   public commandAliases: Collection<string, string>;
   public prefix: string;
   public prisma: PrismaClient;
-  public userDB: Collection<string, UserDB>;
+  public db: ClientDatabase;
+
   constructor() {
     super({
       intents: [
@@ -34,18 +41,22 @@ class Client extends ClientBase {
         GatewayIntentBits.GuildMembers,
       ],
     });
-    this.log = new Logger({
-      debug: IsDev,
-    });
+
+    this.log = new Logger({ debug: IsDev });
     this.token = IsDev
       ? (process.env.DEV_TOKEN as string)
       : (process.env.TOKEN as string);
+
     this.commands = new Collection<string, Command>();
     this.commandAliases = new Collection<string, string>();
     this.prefix = IsDev ? "w!" : "w.";
 
     this.prisma = new PrismaClient();
-    this.userDB = new Collection<string, UserDB>();
+
+    this.db = {
+      users: new Collection<string, UserDB>(),
+      guilds: new Collection<string, GuildDB>(),
+    };
   }
 
   async start() {
@@ -58,6 +69,7 @@ class Client extends ClientBase {
       console.error(`Missing envs: ${missingEnvs.join(", ")}`);
       process.exit(1);
     }
+
     await loadCommands(this);
     await loadEvents(this);
 

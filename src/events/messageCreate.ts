@@ -5,7 +5,7 @@ export default new Event(
   async (client, message) => {
     if (message.author.bot) return;
 
-    const user = client.userDB.get(message.author.id);
+    const user = client.db.users.get(message.author.id);
 
     const prefixes = [client.prefix];
     if (user?.prefix) {

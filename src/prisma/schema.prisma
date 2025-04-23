@@ -34,10 +34,13 @@ model User {
 model Guild {
   id String @id
 
-  name String
+  name   String
+  prefix String?
+  icon   String?
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  seenAt      DateTime?
   blacklistAt DateTime?
 
   GuildUser   GuildUser[]
