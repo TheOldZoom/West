@@ -2,6 +2,8 @@ import type Client from "../structures/Client";
 import { Event } from "../structures/Event";
 import { UserDB } from "../structures/db/UserDB";
 import { GuildDB, GuildPrefixDB, GuildUserDB } from "../structures/db/GuildDB";
+import { PresenceDB } from "../structures/db/presenceDB";
+import { ActivityType } from "discord.js";
 
 export default new Event(
   "ready",
@@ -119,4 +121,25 @@ async function ready(client: Client) {
   }
 
   client.log.info(`Loaded ${client.db.guilds.size} guilds`);
+
+  const presences = await client.prisma.presence.findMany();
+  for (const presence of presences) {
+    if (
+      !PresenceDB.check({
+        id: presence.id,
+        content: presence.content,
+        type: Number(presence.type),
+      })
+    )
+      continue;
+
+    client.db.presences.set(
+      presence.id,
+      new PresenceDB({
+        id: presence.id,
+        content: presence.content,
+        type: Number(presence.type) as ActivityType,
+      })
+    );
+  }
 }

@@ -77,11 +77,20 @@ model GuildPrefix {
   guild Guild @relation(fields: [guildId], references: [id])
 }
 
+enum ActivityType {
+  Playing
+  Streaming
+  Listening
+  Watching
+  Custom
+  Competing
+}
+
 model Presence {
   id String @id @default(uuid())
 
   content String
-  type    String
+  type    ActivityType
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
