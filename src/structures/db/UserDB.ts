@@ -1,5 +1,5 @@
-import type { Prisma } from "../prisma/client";
-import { PrismaClient } from "../prisma/client";
+import type { Prisma } from "../../prisma/client";
+import { PrismaClient } from "../../prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -36,41 +36,5 @@ export class UserDB {
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
     this.blacklistAt = data.blacklistAt;
-  }
-
-  static async create(data: Prisma.UserCreateInput): Promise<UserDB> {
-    const user = await prisma.user.create({
-      data,
-    });
-    return new UserDB(user);
-  }
-
-  static async findById(id: string): Promise<UserDB | null> {
-    const user = await prisma.user.findUnique({
-      where: { id },
-    });
-    return user ? new UserDB(user) : null;
-  }
-
-  static async findOrCreate(
-    id: string,
-    defaultData: Omit<Prisma.UserCreateInput, "id">
-  ): Promise<UserDB> {
-    const user = await prisma.user.findUnique({
-      where: { id },
-    });
-
-    if (user) {
-      return new UserDB(user);
-    }
-
-    const newUser = await prisma.user.create({
-      data: {
-        id,
-        ...defaultData,
-      },
-    });
-
-    return new UserDB(newUser);
   }
 }

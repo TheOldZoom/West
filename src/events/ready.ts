@@ -1,7 +1,7 @@
 import type Client from "../structures/Client";
 import { Event } from "../structures/Event";
-import { UserDB } from "../structures/UserDB";
-import { GuildDB, GuildPrefixDB, GuildUserDB } from "../structures/GuildDB";
+import { UserDB } from "../structures/db/UserDB";
+import { GuildDB, GuildPrefixDB, GuildUserDB } from "../structures/db/GuildDB";
 
 export default new Event(
   "ready",
@@ -31,7 +31,7 @@ async function ready(client: Client) {
 
     const discordData = {
       name: discordGuild.name,
-      icon: discordGuild.icon ?? undefined,
+      icon: discordGuild.icon === undefined ? null : discordGuild.icon,
     };
 
     if (!guild) {
@@ -51,7 +51,9 @@ async function ready(client: Client) {
       for (const key of Object.keys(
         discordData
       ) as (keyof typeof discordData)[]) {
-        if (guild[key] !== discordData[key]) {
+        const existingValue = guild[key] === null ? undefined : guild[key];
+        if (existingValue !== discordData[key]) {
+          // @ts-ignore
           updateData[key] = discordData[key];
         }
       }
@@ -97,12 +99,22 @@ async function ready(client: Client) {
   const guildsInDb = await client.prisma.guild.findMany();
 
   for (const guild of guildsInDb) {
-    if (!cachedGuildIds.has(guild.id)) {
+    if (!cachedGuildIds.has(guild.id) && !guild.seenAt) {
       await client.prisma.guild.update({
         where: { id: guild.id },
         data: { seenAt: new Date() },
       });
-      client.log.info(`Updated 'seenAt' for guild ${guild.name} (${guild.id})`);
+      client.log.info(
+        `Updated 'seenAt' to current for guild ${guild.name} (${guild.id})`
+      );
+    } else if (cachedGuildIds.has(guild.id) && guild.seenAt) {
+      await client.prisma.guild.update({
+        where: { id: guild.id },
+        data: { seenAt: null },
+      });
+      client.log.info(
+        `Updated 'seenAt' to null for guild ${guild.name} (${guild.id})`
+      );
     }
   }
 

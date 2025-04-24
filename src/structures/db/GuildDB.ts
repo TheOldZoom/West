@@ -3,8 +3,8 @@ import type {
   Guild as PrismaGuild,
   GuildUser as PrismaGuildUser,
   GuildPrefix as PrismaGuildPrefix,
-} from "../prisma/client";
-import { PrismaClient } from "../prisma/client";
+} from "../../prisma/client";
+import { PrismaClient } from "../../prisma/client";
 
 const prisma = new PrismaClient();
 

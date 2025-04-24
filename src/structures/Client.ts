@@ -12,8 +12,9 @@ import loadEvents from "../utils/handlers/Events";
 import loadCommands from "../utils/handlers/Commands";
 import { Command } from "./Command";
 import { PrismaClient } from "../prisma/client";
-import type { UserDB } from "./UserDB";
-import type { GuildDB } from "./GuildDB";
+import type { UserDB } from "./db/UserDB";
+import type { GuildDB } from "./db/GuildDB";
+import type { PresenceDB } from "./db/presenceDB";
 
 // @ts-ignore
 DefaultWebSocketManagerOptions.identifyProperties.browser = "Discord Android";
@@ -22,6 +23,7 @@ const IsDev = process.env.NODE_ENV === "development";
 interface ClientDatabase {
   users: Collection<string, UserDB>;
   guilds: Collection<string, GuildDB>;
+  presences: Collection<string, PresenceDB>;
 }
 
 class Client extends ClientBase {
@@ -56,6 +58,7 @@ class Client extends ClientBase {
     this.db = {
       users: new Collection<string, UserDB>(),
       guilds: new Collection<string, GuildDB>(),
+      presences: new Collection<string, PresenceDB>(),
     };
   }
 
